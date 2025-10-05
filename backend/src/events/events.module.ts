@@ -6,11 +6,12 @@ import { Ticket } from './entities/ticket.entity';
 import { EventsService } from './events.service';
 import { EventsController } from './events.controller';
 import { EventsSeederService } from './events.seeder';
+import { EventPurchaseService } from './event-purchase.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Event, Order, Ticket])],
-  providers: [EventsService, EventsSeederService],
+  providers: [EventsService, EventPurchaseService, EventsSeederService],
   controllers: [EventsController],
-  exports: [EventsService, EventsSeederService]
+  exports: [EventsService, EventPurchaseService, EventsSeederService]
 })
 export class EventsModule {}

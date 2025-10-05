@@ -9,6 +9,7 @@ import {
   Post
 } from '@nestjs/common';
 import { EventsService } from './events.service';
+import { EventPurchaseService } from './event-purchase.service';
 import { PurchaseTicketsDto } from './dto/purchase-tickets.dto';
 import {
   EventNotFoundError,
@@ -17,7 +18,10 @@ import {
 
 @Controller('events')
 export class EventsController {
-  constructor(private readonly eventsService: EventsService) {}
+  constructor(
+    private readonly eventsService: EventsService,
+    private readonly eventPurchaseService: EventPurchaseService
+  ) {}
 
   @Get()
   findAll() {
@@ -30,7 +34,7 @@ export class EventsController {
     @Body() dto: PurchaseTicketsDto
   ) {
     try {
-      return await this.eventsService.purchase(id, dto);
+      return await this.eventPurchaseService.purchase(id, dto);
     } catch (error) {
       if (error instanceof EventNotFoundError) {
         throw new NotFoundException(error.message);

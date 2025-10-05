@@ -70,7 +70,7 @@ export class EventsService {
         throw new NotFoundException('Event not found');
       }
 
-      await this.verifyPurchase(event, dto.quantity);
+      await this.verifyPurchase(event, dto.quantity, ticketsRepository);
 
       const order = ordersRepository.create({
         event,
@@ -121,13 +121,14 @@ export class EventsService {
 
   private async verifyPurchase(
     event: Event,
-    quantity: number
+    quantity: number,
+    ticketsRepository: Repository<Ticket>
   ): Promise<void> {
     if (quantity <= 0) {
       throw new BadRequestException('Purchase verification failed');
     }
 
-    const ticketsSold = await this.ticketsRepository.count({
+    const ticketsSold = await ticketsRepository.count({
       where: { event: { id: event.id } }
     });
     const ticketsAvailable = event.ticketCount - ticketsSold;

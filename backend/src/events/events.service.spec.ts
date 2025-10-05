@@ -198,7 +198,7 @@ describe('EventsService', () => {
       lock: { mode: 'pessimistic_write' }
     });
     expect(transactionalTicketRepo.count).toHaveBeenCalledWith({
-      where: { event: { id: 'event-3' } }
+      where: { event: { id: 'event-3' } },
     });
     expect(transactionalOrderRepo.save).toHaveBeenCalledTimes(1);
     expect(transactionalTicketRepo.save).toHaveBeenCalledTimes(1);

@@ -1,6 +1,19 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  ParseUUIDPipe,
+  Post
+} from '@nestjs/common';
 import { EventsService } from './events.service';
 import { PurchaseTicketsDto } from './dto/purchase-tickets.dto';
+import {
+  EventNotFoundError,
+  EventsServiceError
+} from './exceptions/events-service.exception';
 
 @Controller('events')
 export class EventsController {
@@ -12,10 +25,22 @@ export class EventsController {
   }
 
   @Post(':id/purchase')
-  purchase(
+  async purchase(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: PurchaseTicketsDto
   ) {
-    return this.eventsService.purchase(id, dto);
+    try {
+      return await this.eventsService.purchase(id, dto);
+    } catch (error) {
+      if (error instanceof EventNotFoundError) {
+        throw new NotFoundException(error.message);
+      }
+
+      if (error instanceof EventsServiceError) {
+        throw new BadRequestException(error.message);
+      }
+
+      throw error;
+    }
   }
 }

@@ -1,14 +1,16 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Event } from './entities/event.entity';
 import { Order } from './entities/order.entity';
 import { Ticket } from './entities/ticket.entity';
 import { PurchaseTicketsDto } from './dto/purchase-tickets.dto';
+import {
+  EventNotFoundError,
+  EventSoldOutError,
+  InvalidPurchaseQuantityError,
+  NotEnoughTicketsAvailableError
+} from './exceptions/events-service.exception';
 
 export type EventWithAvailability = {
   id: string;
@@ -67,7 +69,7 @@ export class EventsService {
       });
 
       if (!event) {
-        throw new NotFoundException('Event not found');
+        throw new EventNotFoundError(eventId);
       }
 
       await this.verifyPurchase(event, dto.quantity, ticketsRepository);
@@ -125,7 +127,7 @@ export class EventsService {
     ticketsRepository: Repository<Ticket>
   ): Promise<void> {
     if (quantity <= 0) {
-      throw new BadRequestException('Purchase verification failed');
+      throw new InvalidPurchaseQuantityError();
     }
 
     const ticketsSold = await ticketsRepository.count({
@@ -134,11 +136,11 @@ export class EventsService {
     const ticketsAvailable = event.ticketCount - ticketsSold;
 
     if (ticketsAvailable <= 0) {
-      throw new BadRequestException('Event is sold out');
+      throw new EventSoldOutError();
     }
 
     if (quantity > ticketsAvailable) {
-      throw new BadRequestException('Not enough tickets available');
+      throw new NotEnoughTicketsAvailableError();
     }
   }
 

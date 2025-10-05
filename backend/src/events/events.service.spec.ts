@@ -1,11 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { BadRequestException } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { EventsService } from './events.service';
 import { Event } from './entities/event.entity';
 import { Order } from './entities/order.entity';
 import { Ticket } from './entities/ticket.entity';
+import {
+  EventSoldOutError
+} from './exceptions/events-service.exception';
 
 const createMockRepository = () => ({
   find: jest.fn(),
@@ -144,7 +146,7 @@ describe('EventsService', () => {
 
     await expect(
       service.purchase('event-2', { quantity: 1 })
-    ).rejects.toBeInstanceOf(BadRequestException);
+    ).rejects.toBeInstanceOf(EventSoldOutError);
 
     expect(transactionalOrderRepo.create).not.toHaveBeenCalled();
     expect(dataSource.transaction).toHaveBeenCalledTimes(1);
